@@ -90,6 +90,8 @@ public final class CustomTNTEntity implements CustomEntity {
             case LOG_2:
             case LEAVES:
             case LEAVES_2:
+            case HUGE_MUSHROOM_1:
+            case HUGE_MUSHROOM_2:
                 break;
             default:
                 iter.remove();
