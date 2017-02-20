@@ -13,18 +13,25 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.EntityExplodeByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
-@RequiredArgsConstructor
 public final class CustomTNTEntity implements CustomEntity {
     private final CustomTNTPlugin plugin;
+    private final CustomTNTType type;
     @Getter private final String customId;
+
+    CustomTNTEntity(CustomTNTPlugin plugin, CustomTNTType type) {
+        this.plugin = plugin;
+        this.type = type;
+        this.customId = type.customId;
+    }
 
     @Override
     public Entity spawnEntity(Location location, CustomConfig config) {
         TNTPrimed entity = location.getWorld().spawn(location, TNTPrimed.class);
         entity.setIsIncendiary(false);
-        entity.setYield(16.0f);
+        entity.setYield(type.yield);
         return entity;
     }
 
@@ -32,7 +39,7 @@ public final class CustomTNTEntity implements CustomEntity {
     public EntityWatcher createEntityWatcher(Entity entity, CustomConfig config) {
         TNTPrimed tnt = entity instanceof TNTPrimed ? (TNTPrimed)entity : null;
         if (tnt == null) return null;
-        return new CustomTNTEntityWatcher(plugin, tnt, this, config);
+        return new CustomTNTEntityWatcher(plugin, tnt, this, config, type);
     }
 
     @RequiredArgsConstructor
@@ -41,6 +48,7 @@ public final class CustomTNTEntity implements CustomEntity {
         @Getter private final TNTPrimed entity;
         @Getter private final CustomEntity customEntity;
         @Getter private final CustomConfig customConfig;
+        private final CustomTNTType type;
 
         @EventHandler(ignoreCancelled = true)
         public void onEntityExplode(EntityExplodeEvent event) {
@@ -48,15 +56,49 @@ public final class CustomTNTEntity implements CustomEntity {
             while (iter.hasNext()) {
                 Block block = iter.next();
                 OrePlugin.getInstance().realizeBlock(block);
-                switch (block.getType()) {
-                case STONE:
-                case DIRT:
-                case GRASS:
+                switch (type) {
+                case MINING:
+                    filterMining(iter, block);
+                    break;
+                case WOODCUTTING:
+                    filterWoodcutting(iter, block);
                     break;
                 default:
+                    plugin.getLogger().warning("Unhandled TNT type: " + type);
                     iter.remove();
+                    break;
                 }
             }
+        }
+
+        void filterMining(Iterator<Block> iter, Block block) {
+            switch (block.getType()) {
+            case STONE:
+            case DIRT:
+            case GRASS:
+            case GRAVEL:
+            case SAND:
+                break;
+            default:
+                iter.remove();
+            }
+        }
+
+        void filterWoodcutting(Iterator<Block> iter, Block block) {
+            switch (block.getType()) {
+            case LOG:
+            case LOG_2:
+            case LEAVES:
+            case LEAVES_2:
+                break;
+            default:
+                iter.remove();
+            }
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+            event.setCancelled(true);
         }
     }
 }

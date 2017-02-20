@@ -8,13 +8,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class CustomTNTPlugin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         getServer().getPluginManager().registerEvents(this, this);
     }
 
     @EventHandler
     public void onCustomRegister(CustomRegisterEvent event) {
-        event.addItem(new CustomTNTItem(this, "tnt"));
-        event.addBlock(new CustomTNTBlock(this, "tnt"));
-        event.addEntity(new CustomTNTEntity(this, "tnt"));
+        reloadConfig();
+        for (CustomTNTType type: CustomTNTType.values()) {
+            event.addItem(new CustomTNTItem(this, type));
+            event.addBlock(new CustomTNTBlock(this, type));
+            event.addEntity(new CustomTNTEntity(this, type));
+        }
     }
 }

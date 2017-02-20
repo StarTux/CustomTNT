@@ -7,6 +7,7 @@ import com.winthier.custom.util.Dirty;
 import com.winthier.custom.util.Msg;
 import java.util.UUID;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -16,20 +17,24 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public final class CustomTNTItem implements CustomItem {
     private final CustomTNTPlugin plugin;
+    private final CustomTNTType type;
     private final String customId;
     private final ItemStack itemStack;
 
-    CustomTNTItem(CustomTNTPlugin plugin, String customId) {
+    CustomTNTItem(CustomTNTPlugin plugin, CustomTNTType type) {
         this.plugin = plugin;
-        this.customId = customId;
+        this.type = type;
+        this.customId = type.customId;
         ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
-        item = Dirty.setSkullOwner(item, "Custom TNT",
-                                   new UUID(0, 0),
-                                   "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGJkZmZmZGNhMDdkNTYyYmY5OTA1MGU5MGM0ZGI1ZmE1OGM1MDk4MmU1NWNmOTZhOGQxMDIyNTZhZmZhZjUifX19"); // Violet TNT
+        ConfigurationSection config = plugin.getConfig().getConfigurationSection("tnt_types").getConfigurationSection(type.key);
+        item = Dirty.setSkullOwner(item,
+                                   config.getString("DisplayName"),
+                                   UUID.fromString(config.getString("Id", UUID.randomUUID().toString())),
+                                   config.getString("Texture"));
         ItemMeta meta = item.getItemMeta();
         meta.addEnchant(Enchantment.DURABILITY, 0, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        meta.setDisplayName(Msg.format("&rCustom TNT"));
+        meta.setDisplayName(Msg.format("&r%s", config.getString("DisplayName")));
         item.setItemMeta(meta);
         this.itemStack = item;
     }

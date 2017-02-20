@@ -7,14 +7,23 @@ import com.winthier.custom.block.CustomBlock;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 
-@RequiredArgsConstructor
 public final class CustomTNTBlock implements CustomBlock {
     private final CustomTNTPlugin plugin;
+    private final CustomTNTType type;
     @Getter private final String customId;
+
+    CustomTNTBlock(CustomTNTPlugin plugin, CustomTNTType type) {
+        this.plugin = plugin;
+        this.type = type;
+        this.customId = type.customId;
+    }
 
     @Override
     public void setBlock(Block block, CustomConfig config) {
@@ -33,11 +42,26 @@ public final class CustomTNTBlock implements CustomBlock {
         @Getter private final CustomTNTBlock customBlock;
         @Getter private final CustomConfig customConfig;
 
+        void prime() {
+            block.setType(Material.AIR);
+            CustomPlugin.getInstance().getEntityManager().spawnEntity(block.getLocation().add(0.5, 0.0, 0.5), customBlock.getCustomId());
+            block.getWorld().playSound(block.getLocation().add(0.5, 0.5, 0.5), Sound.ENTITY_TNT_PRIMED, 1.0f, 1.0f);
+        }
+
         @EventHandler
         public void onBlockDamage(BlockDamageEvent event) {
             event.setCancelled(true);
-            block.setType(Material.AIR);
-            CustomPlugin.getInstance().getEntityManager().spawnEntity(block.getLocation().add(0.5, 0.0, 0.5), customBlock.getCustomId());
+            prime();
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void onEntityExplode(EntityExplodeEvent event) {
+            event.blockList().remove(block);
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void onBlockExplode(BlockExplodeEvent event) {
+            event.blockList().remove(block);
         }
     }
 }
