@@ -3,6 +3,7 @@ package com.winthier.custom_tnt;
 import com.winthier.custom.CustomConfig;
 import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.item.CustomItem;
+import com.winthier.custom.item.ItemDescription;
 import com.winthier.custom.util.Dirty;
 import com.winthier.custom.util.Msg;
 import java.util.UUID;
@@ -32,10 +33,13 @@ public final class CustomTNTItem implements CustomItem {
                                    UUID.fromString(config.getString("Id", UUID.randomUUID().toString())),
                                    config.getString("Texture"));
         ItemMeta meta = item.getItemMeta();
-        meta.addEnchant(Enchantment.DURABILITY, 0, true);
-        meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         meta.setDisplayName(Msg.format("&r%s", config.getString("DisplayName")));
         item.setItemMeta(meta);
+        ItemDescription description = new ItemDescription();
+        description.setCategory("Explosive");
+        description.setDescription(config.getString("Description", null));
+        description.setUsage(plugin.getConfig().getString("lore.Usage"));
+        description.apply(item);
         this.itemStack = item;
     }
 
