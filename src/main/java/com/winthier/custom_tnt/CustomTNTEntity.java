@@ -1,6 +1,7 @@
 package com.winthier.custom_tnt;
 
 import com.winthier.custom.CustomConfig;
+import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.entity.AbstractEntityWatcher;
 import com.winthier.custom.entity.CustomEntity;
 import com.winthier.custom.entity.EntityWatcher;
@@ -52,6 +53,7 @@ public final class CustomTNTEntity implements CustomEntity {
 
         @EventHandler(ignoreCancelled = true)
         public void onEntityExplode(EntityExplodeEvent event) {
+            CustomPlugin.getInstance().getEntityManager().removeEntity(this);
             Iterator<Block> iter = event.blockList().iterator();
             while (iter.hasNext()) {
                 Block block = iter.next();

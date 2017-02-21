@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
 public final class CustomTNTBlock implements CustomBlock {
@@ -43,15 +44,26 @@ public final class CustomTNTBlock implements CustomBlock {
         @Getter private final CustomConfig customConfig;
 
         void prime() {
+            CustomPlugin.getInstance().getBlockManager().removeBlock(block);
             block.setType(Material.AIR);
             CustomPlugin.getInstance().getEntityManager().spawnEntity(block.getLocation().add(0.5, 0.0, 0.5), customBlock.getCustomId());
             block.getWorld().playSound(block.getLocation().add(0.5, 0.5, 0.5), Sound.ENTITY_TNT_PRIMED, 1.0f, 1.0f);
         }
 
+        void drop() {
+            CustomPlugin.getInstance().getBlockManager().removeBlock(block);
+            block.setType(Material.AIR);
+            CustomPlugin.getInstance().getItemManager().dropItemStack(block.getLocation().add(0.5, 0.5, 0.5), customBlock.getCustomId(), 1);
+        }
+
         @EventHandler
         public void onBlockDamage(BlockDamageEvent event) {
             event.setCancelled(true);
-            prime();
+            if (event.getPlayer().getInventory().getItemInMainHand().getType() == Material.SHEARS) {
+                drop();
+            } else {
+                prime();
+            }
         }
 
         @EventHandler(ignoreCancelled = true)
@@ -62,6 +74,11 @@ public final class CustomTNTBlock implements CustomBlock {
         @EventHandler(ignoreCancelled = true)
         public void onBlockExplode(BlockExplodeEvent event) {
             event.blockList().remove(block);
+        }
+
+        @EventHandler(ignoreCancelled = true)
+        public void onBlockFromTo(BlockFromToEvent event) {
+            drop();
         }
     }
 }
