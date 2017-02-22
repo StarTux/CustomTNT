@@ -1,5 +1,5 @@
 lore:
-  Usage: 'Place this block on the ground, then punch it to activate the fuse. You will have a couple of seconds before it explodes.'
+  Usage: 'Place this block on the ground, then punch it to activate the fuse. You will have a couple of seconds before it explodes. To defuse and pick up a placed TNT block, break it with shears.'
 tnt_types:
   mining:
     DisplayName: Mining Dynamite
