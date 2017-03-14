@@ -3,8 +3,8 @@ package com.winthier.custom_tnt;
 enum CustomTNTType {
     MINING("mining_tnt"),
     WOODCUTTING("woodcutting_tnt"),
-    NUKE("nuke");
-    // SILK,
+    NUKE("nuke"),
+    SILK("silk_tnt");
     // FALLING;
 
     public final String key;

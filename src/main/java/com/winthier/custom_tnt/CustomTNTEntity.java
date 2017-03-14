@@ -20,6 +20,7 @@ import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.inventory.ItemStack;
 
 public final class CustomTNTEntity implements CustomEntity {
     private final CustomTNTPlugin plugin;
@@ -76,6 +77,9 @@ public final class CustomTNTEntity implements CustomEntity {
                     break;
                 case NUKE:
                     filterNuke(iter, block);
+                    break;
+                case SILK:
+                    filterSilk(iter, block);
                     break;
                 default:
                     plugin.getLogger().warning("Unhandled TNT type: " + type);
@@ -138,6 +142,45 @@ public final class CustomTNTEntity implements CustomEntity {
         case MYCEL:
             block.setType(Material.DIRT);
             iter.remove();
+            break;
+        default:
+            iter.remove();
+        }
+    }
+
+    void filterSilk(Iterator<Block> iter, Block block) {
+        Material mat = block.getType();
+        switch (mat) {
+        case STONE:
+        case COAL_ORE:
+        case DIAMOND_ORE:
+        case EMERALD_ORE:
+        case REDSTONE_ORE:
+        case GOLD_ORE:
+        case IRON_ORE:
+        case LAPIS_ORE:
+        case QUARTZ_ORE:
+        case GRASS:
+        case WEB:
+        case GLASS:
+        case THIN_GLASS:
+        case ICE:
+        case VINE:
+            iter.remove();
+            block.setType(Material.AIR);
+            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat));
+            break;
+        case STAINED_GLASS:
+        case STAINED_GLASS_PANE:
+            byte data = block.getData();
+            iter.remove();
+            block.setType(Material.AIR);
+            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, data));
+            break;
+        case GLOWING_REDSTONE_ORE:
+            iter.remove();
+            block.setType(Material.AIR);
+            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.REDSTONE_ORE));
             break;
         default:
             iter.remove();

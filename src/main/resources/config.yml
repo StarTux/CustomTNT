@@ -19,3 +19,10 @@ types:
     Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2ZhZjNlZmJmZjZkN2VmNDY1ZWNhY2JjNTE3ZjRkYWQ1Y2MxYTIyNjFlYTdhNjA5ZjIxNmFhZTQ4Nzg0In19fQ==
     Description: 'The nuke will destroy all kinds of foliage, including grass, which it turns into wasteland. Be wary of its wide explosion radius.'
     Yield: 32
+  silk:
+    DisplayName: Silk Blast
+    Id: 30a55204-8ae8-476e-803f-97324e627391
+    Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNlNmQ4MjE4NmEzNzdmNTQzNWU5ODZkMWY5NmIwNDY5MTk3MTM4NjFiYmJiZGVlMzBlYWRiODMxYzI0In19fQ==
+    Description: 'Break blocks such as ores, stone, glass, and some others, as if they were broken with a silk touch pickaxe.'
+    Yield: 4
+    
