@@ -8,7 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class CustomTNTPlugin extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
-        saveDefaultConfig();
+        // saveDefaultConfig(); TODO uncomment!!!
         getServer().getPluginManager().registerEvents(this, this);
     }
 

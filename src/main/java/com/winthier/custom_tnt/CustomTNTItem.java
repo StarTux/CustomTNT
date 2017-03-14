@@ -26,7 +26,7 @@ public final class CustomTNTItem implements CustomItem {
         this.type = type;
         this.customId = type.customId;
         ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
-        ConfigurationSection config = plugin.getConfig().getConfigurationSection("tnt_types").getConfigurationSection(type.key);
+        ConfigurationSection config = plugin.getConfig().getConfigurationSection("types").getConfigurationSection(type.key);
         item = Dirty.setSkullOwner(item,
                                    config.getString("DisplayName"),
                                    UUID.fromString(config.getString("Id", UUID.randomUUID().toString())),
@@ -36,7 +36,7 @@ public final class CustomTNTItem implements CustomItem {
         item.setItemMeta(meta);
         ItemDescription description = new ItemDescription();
         description.setCategory("Explosive");
-        description.setDescription(config.getString("Description", null));
+        description.setDescription(config.getString("Description"));
         description.setUsage(plugin.getConfig().getString("lore.Usage"));
         description.apply(item);
         this.itemStack = item;

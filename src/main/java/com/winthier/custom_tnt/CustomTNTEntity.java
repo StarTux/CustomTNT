@@ -5,12 +5,14 @@ import com.winthier.custom.block.BlockWatcher;
 import com.winthier.custom.entity.CustomEntity;
 import com.winthier.custom.entity.EntityContext;
 import com.winthier.custom.entity.EntityWatcher;
+import com.winthier.generic_events.GenericEventsPlugin;
 import com.winthier.ore.OrePlugin;
 import java.util.Iterator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -34,7 +36,8 @@ public final class CustomTNTEntity implements CustomEntity {
     public Entity spawnEntity(Location location) {
         TNTPrimed entity = location.getWorld().spawn(location, TNTPrimed.class);
         entity.setIsIncendiary(false);
-        entity.setYield(type.yield);
+        float yield = (float)plugin.getConfig().getConfigurationSection("types").getConfigurationSection(type.key).getDouble("Yield");
+        entity.setYield(yield);
         return entity;
     }
 
@@ -49,8 +52,14 @@ public final class CustomTNTEntity implements CustomEntity {
     public void onEntityExplode(EntityExplodeEvent event, EntityContext context) {
         CustomPlugin.getInstance().getEntityManager().removeEntity(context.getEntityWatcher());
         Iterator<Block> iter = event.blockList().iterator();
+        Player player = ((Watcher)context.getEntityWatcher()).getSource();
         while (iter.hasNext()) {
             Block block = iter.next();
+            if (!GenericEventsPlugin.getInstance().playerCanBuild(player, block)
+                || !GenericEventsPlugin.getInstance().playerCanGrief(player, block)) {
+                iter.remove();
+                continue;
+            }
             BlockWatcher foundWatcher = CustomPlugin.getInstance().getBlockManager().getBlockWatcher(block);
             if (foundWatcher != null) {
                 if (!(foundWatcher.getCustomBlock() instanceof CustomTNTBlock)) {
@@ -64,6 +73,9 @@ public final class CustomTNTEntity implements CustomEntity {
                     break;
                 case WOODCUTTING:
                     filterWoodcutting(iter, block);
+                    break;
+                case NUKE:
+                    filterNuke(iter, block);
                     break;
                 default:
                     plugin.getLogger().warning("Unhandled TNT type: " + type);
@@ -95,6 +107,37 @@ public final class CustomTNTEntity implements CustomEntity {
         case LEAVES_2:
         case HUGE_MUSHROOM_1:
         case HUGE_MUSHROOM_2:
+            break;
+        default:
+            iter.remove();
+        }
+    }
+
+    void filterNuke(Iterator<Block> iter, Block block) {
+        switch (block.getType()) {
+        case LEAVES:
+        case LEAVES_2:
+        case GLASS:
+        case THIN_GLASS:
+        case STAINED_GLASS:
+        case STAINED_GLASS_PANE:
+        case DOUBLE_PLANT:
+        case ICE:
+        case BROWN_MUSHROOM:
+        case RED_MUSHROOM:
+        case LONG_GRASS:
+        case DEAD_BUSH:
+        case VINE:
+            break;
+        case YELLOW_FLOWER:
+        case RED_ROSE:
+            iter.remove();
+            block.setType(Material.DEAD_BUSH);
+            break;
+        case GRASS:
+        case MYCEL:
+            block.setType(Material.DIRT);
+            iter.remove();
             break;
         default:
             iter.remove();
