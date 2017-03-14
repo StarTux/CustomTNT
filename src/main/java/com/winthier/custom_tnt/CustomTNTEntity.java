@@ -1,17 +1,19 @@
 package com.winthier.custom_tnt;
 
-import com.winthier.custom.CustomConfig;
 import com.winthier.custom.CustomPlugin;
-import com.winthier.custom.entity.AbstractEntityWatcher;
+import com.winthier.custom.block.BlockWatcher;
 import com.winthier.custom.entity.CustomEntity;
+import com.winthier.custom.entity.EntityContext;
 import com.winthier.custom.entity.EntityWatcher;
 import com.winthier.ore.OrePlugin;
 import java.util.Iterator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -29,7 +31,7 @@ public final class CustomTNTEntity implements CustomEntity {
     }
 
     @Override
-    public Entity spawnEntity(Location location, CustomConfig config) {
+    public Entity spawnEntity(Location location) {
         TNTPrimed entity = location.getWorld().spawn(location, TNTPrimed.class);
         entity.setIsIncendiary(false);
         entity.setYield(type.yield);
@@ -37,26 +39,24 @@ public final class CustomTNTEntity implements CustomEntity {
     }
 
     @Override
-    public EntityWatcher createEntityWatcher(Entity entity, CustomConfig config) {
+    public EntityWatcher createEntityWatcher(Entity entity) {
         TNTPrimed tnt = entity instanceof TNTPrimed ? (TNTPrimed)entity : null;
         if (tnt == null) return null;
-        return new CustomTNTEntityWatcher(plugin, tnt, this, config, type);
+        return new Watcher(plugin, tnt, this, type);
     }
 
-    @RequiredArgsConstructor
-    public static final class CustomTNTEntityWatcher extends AbstractEntityWatcher {
-        @Getter private final CustomTNTPlugin plugin;
-        @Getter private final TNTPrimed entity;
-        @Getter private final CustomEntity customEntity;
-        @Getter private final CustomConfig customConfig;
-        private final CustomTNTType type;
-
-        @EventHandler(ignoreCancelled = true)
-        public void onEntityExplode(EntityExplodeEvent event) {
-            CustomPlugin.getInstance().getEntityManager().removeEntity(this);
-            Iterator<Block> iter = event.blockList().iterator();
-            while (iter.hasNext()) {
-                Block block = iter.next();
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityExplode(EntityExplodeEvent event, EntityContext context) {
+        CustomPlugin.getInstance().getEntityManager().removeEntity(context.getEntityWatcher());
+        Iterator<Block> iter = event.blockList().iterator();
+        while (iter.hasNext()) {
+            Block block = iter.next();
+            BlockWatcher foundWatcher = CustomPlugin.getInstance().getBlockManager().getBlockWatcher(block);
+            if (foundWatcher != null) {
+                if (!(foundWatcher.getCustomBlock() instanceof CustomTNTBlock)) {
+                    iter.remove();
+                }
+            } else {
                 OrePlugin.getInstance().realizeBlock(block);
                 switch (type) {
                 case MINING:
@@ -72,37 +72,46 @@ public final class CustomTNTEntity implements CustomEntity {
                 }
             }
         }
+    }
 
-        void filterMining(Iterator<Block> iter, Block block) {
-            switch (block.getType()) {
-            case STONE:
-            case DIRT:
-            case GRASS:
-            case GRAVEL:
-            case SAND:
-                break;
-            default:
-                iter.remove();
-            }
+    void filterMining(Iterator<Block> iter, Block block) {
+        switch (block.getType()) {
+        case STONE:
+        case DIRT:
+        case GRASS:
+        case GRAVEL:
+        case SAND:
+            break;
+        default:
+            iter.remove();
         }
+    }
 
-        void filterWoodcutting(Iterator<Block> iter, Block block) {
-            switch (block.getType()) {
-            case LOG:
-            case LOG_2:
-            case LEAVES:
-            case LEAVES_2:
-            case HUGE_MUSHROOM_1:
-            case HUGE_MUSHROOM_2:
-                break;
-            default:
-                iter.remove();
-            }
+    void filterWoodcutting(Iterator<Block> iter, Block block) {
+        switch (block.getType()) {
+        case LOG:
+        case LOG_2:
+        case LEAVES:
+        case LEAVES_2:
+        case HUGE_MUSHROOM_1:
+        case HUGE_MUSHROOM_2:
+            break;
+        default:
+            iter.remove();
         }
+    }
 
-        @EventHandler(ignoreCancelled = true)
-        public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-            event.setCancelled(true);
-        }
+    @EventHandler(ignoreCancelled = true)
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        event.setCancelled(true);
+    }
+
+    @RequiredArgsConstructor
+    public static final class Watcher implements EntityWatcher {
+        @Getter private final CustomTNTPlugin plugin;
+        @Getter private final TNTPrimed entity;
+        @Getter private final CustomEntity customEntity;
+        private final CustomTNTType type;
+        @Getter @Setter Player source;
     }
 }

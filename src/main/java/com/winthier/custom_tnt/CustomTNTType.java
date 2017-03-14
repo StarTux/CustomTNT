@@ -3,6 +3,9 @@ package com.winthier.custom_tnt;
 enum CustomTNTType {
     MINING,
     WOODCUTTING;
+    // NUCLEAR,
+    // SILK,
+    // FALLING;
 
     public final String key;
     public final String customId;

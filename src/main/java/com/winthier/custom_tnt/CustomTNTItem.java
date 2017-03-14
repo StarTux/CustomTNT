@@ -1,6 +1,5 @@
 package com.winthier.custom_tnt;
 
-import com.winthier.custom.CustomConfig;
 import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.item.CustomItem;
 import com.winthier.custom.item.ItemDescription;
@@ -49,7 +48,7 @@ public final class CustomTNTItem implements CustomItem {
     }
 
     @Override
-    public ItemStack spawnItemStack(int amount, CustomConfig config) {
+    public ItemStack spawnItemStack(int amount) {
         ItemStack result = itemStack.clone();
         result.setAmount(amount);
         return result;
@@ -57,6 +56,6 @@ public final class CustomTNTItem implements CustomItem {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
-        CustomPlugin.getInstance().getBlockManager().setBlock(event.getBlock(), customId);
+        CustomPlugin.getInstance().getBlockManager().wrapBlock(event.getBlock(), customId);
     }
 }
