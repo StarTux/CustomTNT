@@ -155,17 +155,43 @@ public final class CustomTNTEntity implements CustomEntity {
         case LONG_GRASS:
         case DEAD_BUSH:
         case VINE:
+        case WEB:
+        case CROPS:
+        case CARROT:
+        case POTATO:
+        case NETHER_STALK:
+        case BEETROOT_BLOCK:
+        case WATER_LILY:
+        case CACTUS:
+        case CHORUS_FLOWER:
+        case CHORUS_PLANT:
+        case SUGAR_CANE_BLOCK:
+        case HAY_BLOCK:
+        case PUMPKIN:
+        case JACK_O_LANTERN:
+        case MELON_BLOCK:
             break;
         case YELLOW_FLOWER:
         case RED_ROSE:
+        case SAPLING:
+        case MELON_STEM:
+        case PUMPKIN_STEM:
             block.setType(Material.DEAD_BUSH);
             iter.remove();
             customExplodeBlocks.add(block);
             break;
         case GRASS:
         case MYCEL:
+        case DIRT:
+        case GRASS_PATH:
             iter.remove();
             block.setType(Material.DIRT);
+            block.setData((byte)1); // Coarse dirt
+            customExplodeBlocks.add(block);
+            break;
+        case SOIL:
+            iter.remove();
+            block.setType(Material.SOUL_SAND);
             customExplodeBlocks.add(block);
             break;
         case SAND:
@@ -191,6 +217,7 @@ public final class CustomTNTEntity implements CustomEntity {
         case LAPIS_ORE:
         case QUARTZ_ORE:
         case GRASS:
+        case MYCEL:
         case WEB:
         case GLASS:
         case THIN_GLASS:
@@ -221,12 +248,16 @@ public final class CustomTNTEntity implements CustomEntity {
     }
 
     void filterKinetic(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
+        switch (block.getType()) {
+        case MOB_SPAWNER:
+            return;
+        }
         iter.remove();
         MaterialData data = block.getState().getData();
         block.setType(Material.AIR);
-        Vector velo = new Vector(random.nextDouble() * 2.0 - 1.0,
-                                 random.nextDouble() * 2.0,
-                                 random.nextDouble() * 2.0 - 1.0);
+        Vector velo = new Vector(random.nextDouble() * 1.0 - 0.5,
+                                 random.nextDouble() * 1.0,
+                                 random.nextDouble() * 1.0 - 0.5);
         block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data).setVelocity(velo);
         customExplodeBlocks.add(block);
     }
