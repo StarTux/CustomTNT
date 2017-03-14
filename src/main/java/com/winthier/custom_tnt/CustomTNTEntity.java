@@ -6,8 +6,9 @@ import com.winthier.custom.entity.CustomEntity;
 import com.winthier.custom.entity.EntityContext;
 import com.winthier.custom.entity.EntityWatcher;
 import com.winthier.generic_events.GenericEventsPlugin;
-import com.winthier.ore.OrePlugin;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +31,19 @@ public final class CustomTNTEntity implements CustomEntity {
     private final CustomTNTType type;
     @Getter private final String customId;
     private final Random random = new Random(System.currentTimeMillis());
+    private final float yield;
 
     CustomTNTEntity(CustomTNTPlugin plugin, CustomTNTType type) {
         this.plugin = plugin;
         this.type = type;
         this.customId = type.customId;
+        this.yield = (float)plugin.getConfig().getConfigurationSection("types").getConfigurationSection(type.key).getDouble("Yield");
     }
 
     @Override
     public Entity spawnEntity(Location location) {
         TNTPrimed entity = location.getWorld().spawn(location, TNTPrimed.class);
         entity.setIsIncendiary(false);
-        float yield = (float)plugin.getConfig().getConfigurationSection("types").getConfigurationSection(type.key).getDouble("Yield");
         entity.setYield(yield);
         return entity;
     }
@@ -55,9 +57,15 @@ public final class CustomTNTEntity implements CustomEntity {
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event, EntityContext context) {
-        CustomPlugin.getInstance().getEntityManager().removeEntity(context.getEntityWatcher());
+        CustomPlugin.getInstance().getEntityManager().removeEntityWatcher(context.getEntityWatcher());
         Iterator<Block> iter = event.blockList().iterator();
         Player player = ((Watcher)context.getEntityWatcher()).getSource();
+        if (player == null) {
+            event.setCancelled(true);
+            event.blockList().clear();
+            return;
+        }
+        List<Block> customExplodeBlocks = new ArrayList<>();
         while (iter.hasNext()) {
             Block block = iter.next();
             if (!GenericEventsPlugin.getInstance().playerCanBuild(player, block)
@@ -67,11 +75,13 @@ public final class CustomTNTEntity implements CustomEntity {
             }
             BlockWatcher foundWatcher = CustomPlugin.getInstance().getBlockManager().getBlockWatcher(block);
             if (foundWatcher != null) {
-                if (!(foundWatcher.getCustomBlock() instanceof CustomTNTBlock)) {
-                    iter.remove();
+                if (foundWatcher.getCustomBlock() instanceof CustomTNTBlock) {
+                    CustomTNTBlock customTNTBlock = (CustomTNTBlock)foundWatcher.getCustomBlock();
+                    customTNTBlock.prime(block, player);
+                    customExplodeBlocks.add(block);
                 }
+                iter.remove();
             } else {
-                OrePlugin.getInstance().realizeBlock(block);
                 switch (type) {
                 case MINING:
                     filterMining(iter, block);
@@ -80,13 +90,15 @@ public final class CustomTNTEntity implements CustomEntity {
                     filterWoodcutting(iter, block);
                     break;
                 case NUKE:
-                    filterNuke(iter, block);
+                    filterNuke(iter, block, customExplodeBlocks);
                     break;
                 case SILK:
-                    filterSilk(iter, block);
+                    filterSilk(iter, block, customExplodeBlocks);
                     break;
                 case KINETIC:
-                    filterKinetic(iter, block);
+                    filterKinetic(iter, block, customExplodeBlocks);
+                    break;
+                case POWER:
                     break;
                 default:
                     plugin.getLogger().warning("Unhandled TNT type: " + type);
@@ -94,6 +106,10 @@ public final class CustomTNTEntity implements CustomEntity {
                     break;
                 }
             }
+        }
+        if (!customExplodeBlocks.isEmpty()) {
+            EntityExplodeEvent customEvent = new EntityExplodeEvent(event.getEntity(), event.getEntity().getLocation(), customExplodeBlocks, yield);
+            plugin.getServer().getPluginManager().callEvent(customEvent);
         }
     }
 
@@ -124,7 +140,7 @@ public final class CustomTNTEntity implements CustomEntity {
         }
     }
 
-    void filterNuke(Iterator<Block> iter, Block block) {
+    void filterNuke(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
         switch (block.getType()) {
         case LEAVES:
         case LEAVES_2:
@@ -142,20 +158,27 @@ public final class CustomTNTEntity implements CustomEntity {
             break;
         case YELLOW_FLOWER:
         case RED_ROSE:
-            iter.remove();
             block.setType(Material.DEAD_BUSH);
+            iter.remove();
+            customExplodeBlocks.add(block);
             break;
         case GRASS:
         case MYCEL:
-            block.setType(Material.DIRT);
             iter.remove();
+            block.setType(Material.DIRT);
+            customExplodeBlocks.add(block);
+            break;
+        case SAND:
+            iter.remove();
+            block.setType(Material.GLASS);
+            customExplodeBlocks.add(block);
             break;
         default:
             iter.remove();
         }
     }
 
-    void filterSilk(Iterator<Block> iter, Block block) {
+    void filterSilk(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
         Material mat = block.getType();
         switch (mat) {
         case STONE:
@@ -176,6 +199,7 @@ public final class CustomTNTEntity implements CustomEntity {
             iter.remove();
             block.setType(Material.AIR);
             block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat));
+            customExplodeBlocks.add(block);
             break;
         case STAINED_GLASS:
         case STAINED_GLASS_PANE:
@@ -183,18 +207,20 @@ public final class CustomTNTEntity implements CustomEntity {
             iter.remove();
             block.setType(Material.AIR);
             block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, data));
+            customExplodeBlocks.add(block);
             break;
         case GLOWING_REDSTONE_ORE:
             iter.remove();
             block.setType(Material.AIR);
             block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.REDSTONE_ORE));
+            customExplodeBlocks.add(block);
             break;
         default:
             iter.remove();
         }
     }
 
-    void filterKinetic(Iterator<Block> iter, Block block) {
+    void filterKinetic(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
         iter.remove();
         MaterialData data = block.getState().getData();
         block.setType(Material.AIR);
@@ -202,6 +228,7 @@ public final class CustomTNTEntity implements CustomEntity {
                                  random.nextDouble() * 2.0,
                                  random.nextDouble() * 2.0 - 1.0);
         block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data).setVelocity(velo);
+        customExplodeBlocks.add(block);
     }
 
     @EventHandler(ignoreCancelled = true)

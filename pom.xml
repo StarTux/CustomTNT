@@ -36,13 +36,6 @@
       <version>0.1</version>
       <scope>provided</scope>
     </dependency>
-    <!-- Ore -->
-    <dependency>
-      <groupId>com.winthier.ore</groupId>
-      <artifactId>ore</artifactId>
-      <version>0.1</version>
-      <scope>provided</scope>
-    </dependency>
     <!-- Generic Events -->
     <dependency>
       <groupId>com.winthier.generic_events</groupId>

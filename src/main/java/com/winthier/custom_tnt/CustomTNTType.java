@@ -5,7 +5,8 @@ enum CustomTNTType {
     WOODCUTTING("woodcutting_tnt"),
     NUKE("nuke"),
     SILK("silk_tnt"),
-    KINETIC("kinetic_tnt");
+    KINETIC("kinetic_tnt"),
+    POWER("power_tnt");
 
     public final String key;
     public final String customId;
