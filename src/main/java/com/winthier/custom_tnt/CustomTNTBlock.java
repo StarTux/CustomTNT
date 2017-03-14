@@ -5,7 +5,6 @@ import com.winthier.custom.block.BlockContext;
 import com.winthier.custom.block.CustomBlock;
 import com.winthier.custom.entity.EntityWatcher;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;

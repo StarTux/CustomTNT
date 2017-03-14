@@ -149,12 +149,12 @@ public final class CustomTNTEntity implements CustomEntity {
         event.setCancelled(true);
     }
 
-    @RequiredArgsConstructor
+    @Getter @RequiredArgsConstructor
     public static final class Watcher implements EntityWatcher {
-        @Getter private final CustomTNTPlugin plugin;
-        @Getter private final TNTPrimed entity;
-        @Getter private final CustomEntity customEntity;
+        private final CustomTNTPlugin plugin;
+        private final TNTPrimed entity;
+        private final CustomEntity customEntity;
         private final CustomTNTType type;
-        @Getter @Setter Player source;
+        @Setter private Player source;
     }
 }
