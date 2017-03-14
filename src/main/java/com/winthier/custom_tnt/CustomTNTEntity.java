@@ -8,6 +8,7 @@ import com.winthier.custom.entity.EntityWatcher;
 import com.winthier.generic_events.GenericEventsPlugin;
 import com.winthier.ore.OrePlugin;
 import java.util.Iterator;
+import java.util.Random;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -21,11 +22,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+import org.bukkit.util.Vector;
 
 public final class CustomTNTEntity implements CustomEntity {
     private final CustomTNTPlugin plugin;
     private final CustomTNTType type;
     @Getter private final String customId;
+    private final Random random = new Random(System.currentTimeMillis());
 
     CustomTNTEntity(CustomTNTPlugin plugin, CustomTNTType type) {
         this.plugin = plugin;
@@ -80,6 +84,9 @@ public final class CustomTNTEntity implements CustomEntity {
                     break;
                 case SILK:
                     filterSilk(iter, block);
+                    break;
+                case KINETIC:
+                    filterKinetic(iter, block);
                     break;
                 default:
                     plugin.getLogger().warning("Unhandled TNT type: " + type);
@@ -185,6 +192,16 @@ public final class CustomTNTEntity implements CustomEntity {
         default:
             iter.remove();
         }
+    }
+
+    void filterKinetic(Iterator<Block> iter, Block block) {
+        iter.remove();
+        MaterialData data = block.getState().getData();
+        block.setType(Material.AIR);
+        Vector velo = new Vector(random.nextDouble() * 2.0 - 1.0,
+                                 random.nextDouble() * 2.0,
+                                 random.nextDouble() * 2.0 - 1.0);
+        block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data).setVelocity(velo);
     }
 
     @EventHandler(ignoreCancelled = true)
