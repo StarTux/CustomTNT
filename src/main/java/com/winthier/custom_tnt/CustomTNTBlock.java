@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
@@ -32,12 +33,14 @@ public final class CustomTNTBlock implements CustomBlock {
         block.setType(Material.SKULL);
     }
 
-    CustomTNTEntity.Watcher prime(Block block) {
+    CustomTNTEntity.Watcher prime(Block block, Player source) {
         CustomPlugin.getInstance().getBlockManager().removeBlock(block);
         block.setType(Material.AIR);
         EntityWatcher watcher = CustomPlugin.getInstance().getEntityManager().spawnEntity(block.getLocation().add(0.5, 0.0, 0.5), customId);
         block.getWorld().playSound(block.getLocation().add(0.5, 0.5, 0.5), Sound.ENTITY_TNT_PRIMED, 1.0f, 1.0f);
-        return (CustomTNTEntity.Watcher)watcher;
+        CustomTNTEntity.Watcher tntWatcher = (CustomTNTEntity.Watcher)watcher;
+        tntWatcher.setSource(source);
+        return tntWatcher;
     }
 
     void drop(Block block) {
@@ -52,7 +55,7 @@ public final class CustomTNTBlock implements CustomBlock {
         if (event.getPlayer().getInventory().getItemInMainHand().getType() == Material.SHEARS) {
             drop(context.getBlock());
         } else {
-            prime(context.getBlock()).setSource(event.getPlayer());
+            prime(context.getBlock(), event.getPlayer());
         }
     }
 
@@ -62,20 +65,22 @@ public final class CustomTNTBlock implements CustomBlock {
         if (event.getPlayer().getInventory().getItemInMainHand().getType() == Material.SHEARS) {
             drop(context.getBlock());
         } else {
-            prime(context.getBlock()).setSource(event.getPlayer());
+            prime(context.getBlock(), event.getPlayer());
         }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event, BlockContext context) {
         event.blockList().remove(context.getBlock());
-        prime(context.getBlock());
+        EntityWatcher entityWatcher = CustomPlugin.getInstance().getEntityManager().getEntityWatcher(event.getEntity());
+        if (entityWatcher != null && entityWatcher instanceof CustomTNTEntity.Watcher) {
+            prime(context.getBlock(), ((CustomTNTEntity.Watcher)entityWatcher).getSource());
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockExplode(BlockExplodeEvent event, BlockContext context) {
         event.blockList().remove(context.getBlock());
-        prime(context.getBlock());
     }
 
     @EventHandler(ignoreCancelled = true)
