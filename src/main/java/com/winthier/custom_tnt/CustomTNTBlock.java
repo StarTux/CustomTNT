@@ -2,6 +2,7 @@ package com.winthier.custom_tnt;
 
 import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.block.BlockContext;
+import com.winthier.custom.block.BlockWatcher;
 import com.winthier.custom.block.CustomBlock;
 import com.winthier.custom.entity.EntityWatcher;
 import lombok.Getter;
@@ -32,8 +33,9 @@ public final class CustomTNTBlock implements CustomBlock {
         block.setType(Material.SKULL);
     }
 
-    CustomTNTEntity.Watcher prime(Block block, Player source) {
-        CustomPlugin.getInstance().getBlockManager().removeBlock(block);
+    CustomTNTEntity.Watcher prime(BlockWatcher blockWatcher, Player source) {
+        CustomPlugin.getInstance().getBlockManager().removeBlockWatcher(blockWatcher);
+        Block block = blockWatcher.getBlock();
         block.setType(Material.AIR);
         EntityWatcher watcher = CustomPlugin.getInstance().getEntityManager().spawnEntity(block.getLocation().add(0.5, 0.0, 0.5), customId);
         block.getWorld().playSound(block.getLocation().add(0.5, 0.5, 0.5), Sound.ENTITY_TNT_PRIMED, 1.0f, 1.0f);
@@ -42,8 +44,9 @@ public final class CustomTNTBlock implements CustomBlock {
         return tntWatcher;
     }
 
-    void drop(Block block) {
-        CustomPlugin.getInstance().getBlockManager().removeBlock(block);
+    void drop(BlockWatcher blockWatcher) {
+        CustomPlugin.getInstance().getBlockManager().removeBlockWatcher(blockWatcher);
+        Block block = blockWatcher.getBlock();
         block.setType(Material.AIR);
         CustomPlugin.getInstance().getItemManager().dropItemStack(block.getLocation().add(0.5, 0.5, 0.5), customId, 1);
     }
@@ -52,9 +55,9 @@ public final class CustomTNTBlock implements CustomBlock {
     public void onBlockDamage(BlockDamageEvent event, BlockContext context) {
         event.setCancelled(true);
         if (event.getPlayer().getInventory().getItemInMainHand().getType() == Material.SHEARS) {
-            drop(context.getBlock());
+            drop(context.getBlockWatcher());
         } else {
-            prime(context.getBlock(), event.getPlayer());
+            prime(context.getBlockWatcher(), event.getPlayer());
         }
     }
 
@@ -62,9 +65,9 @@ public final class CustomTNTBlock implements CustomBlock {
     public void onBlockBreak(BlockBreakEvent event, BlockContext context) {
         event.setCancelled(true);
         if (event.getPlayer().getInventory().getItemInMainHand().getType() == Material.SHEARS) {
-            drop(context.getBlock());
+            drop(context.getBlockWatcher());
         } else {
-            prime(context.getBlock(), event.getPlayer());
+            prime(context.getBlockWatcher(), event.getPlayer());
         }
     }
 
@@ -73,7 +76,7 @@ public final class CustomTNTBlock implements CustomBlock {
         event.blockList().remove(context.getBlock());
         EntityWatcher entityWatcher = CustomPlugin.getInstance().getEntityManager().getEntityWatcher(event.getEntity());
         if (entityWatcher != null && entityWatcher instanceof CustomTNTEntity.Watcher) {
-            prime(context.getBlock(), ((CustomTNTEntity.Watcher)entityWatcher).getSource());
+            prime(context.getBlockWatcher(), ((CustomTNTEntity.Watcher)entityWatcher).getSource());
         }
     }
 

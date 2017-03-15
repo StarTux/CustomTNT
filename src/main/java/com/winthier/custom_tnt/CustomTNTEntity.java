@@ -77,7 +77,7 @@ public final class CustomTNTEntity implements CustomEntity {
             if (foundWatcher != null) {
                 if (foundWatcher.getCustomBlock() instanceof CustomTNTBlock) {
                     CustomTNTBlock customTNTBlock = (CustomTNTBlock)foundWatcher.getCustomBlock();
-                    customTNTBlock.prime(block, player);
+                    customTNTBlock.prime(foundWatcher, player);
                     customExplodeBlocks.add(block);
                 }
                 iter.remove();
@@ -170,6 +170,7 @@ public final class CustomTNTEntity implements CustomEntity {
         case PUMPKIN:
         case JACK_O_LANTERN:
         case MELON_BLOCK:
+        case SNOW:
             break;
         case YELLOW_FLOWER:
         case RED_ROSE:
@@ -255,9 +256,9 @@ public final class CustomTNTEntity implements CustomEntity {
         iter.remove();
         MaterialData data = block.getState().getData();
         block.setType(Material.AIR);
-        Vector velo = new Vector(random.nextDouble() * 1.0 - 0.5,
-                                 random.nextDouble() * 1.0,
-                                 random.nextDouble() * 1.0 - 0.5);
+        Vector velo = new Vector(random.nextDouble() * 0.5 - 0.25,
+                                 random.nextDouble() * 2.0 + 1.0,
+                                 random.nextDouble() * 0.5 - 0.25);
         block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data).setVelocity(velo);
         customExplodeBlocks.add(block);
     }
