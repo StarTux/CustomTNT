@@ -17,6 +17,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
@@ -24,6 +25,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public final class CustomTNTEntity implements CustomEntity {
@@ -264,8 +267,29 @@ public final class CustomTNTEntity implements CustomEntity {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event, EntityContext context) {
         event.setCancelled(true);
+        if (context.getPosition() == EntityContext.Position.DAMAGER) {
+            if (event.getEntity() instanceof LivingEntity) {
+                LivingEntity entity = (LivingEntity)event.getEntity();
+                Player player = ((Watcher)context.getEntityWatcher()).getSource();
+                if (GenericEventsPlugin.getInstance().playerCanDamageEntity(player, entity)) {
+                    switch (type) {
+                    case NUKE:
+                        entity.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 60, 1));
+                        entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 60, 1));
+                        break;
+                    case KINETIC:
+                        entity.setVelocity(new Vector(random.nextDouble() * 1.0 - 0.5,
+                                                      random.nextDouble() * 4.0 + 2.0,
+                                                      random.nextDouble() * 1.0 - 0.5));
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     @Getter @RequiredArgsConstructor
