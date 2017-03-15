@@ -174,6 +174,7 @@ public final class CustomTNTEntity implements CustomEntity {
         case JACK_O_LANTERN:
         case MELON_BLOCK:
         case SNOW:
+        case COCOA:
             break;
         case YELLOW_FLOWER:
         case RED_ROSE:
@@ -227,6 +228,8 @@ public final class CustomTNTEntity implements CustomEntity {
         case THIN_GLASS:
         case ICE:
         case VINE:
+        case SNOW:
+            // Copy without data
             iter.remove();
             block.setType(Material.AIR);
             block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat));
@@ -234,11 +237,32 @@ public final class CustomTNTEntity implements CustomEntity {
             break;
         case STAINED_GLASS:
         case STAINED_GLASS_PANE:
-            byte data = block.getData();
+        case LONG_GRASS:
+            // Copy with data
             iter.remove();
+            byte data = block.getData();
             block.setType(Material.AIR);
             block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, data));
             customExplodeBlocks.add(block);
+            break;
+        case LEAVES:
+        case LEAVES_2:
+            // Copy with modified leaf data
+            iter.remove();
+            int iData = (int)block.getData() & ~12;
+            block.setType(Material.AIR);
+            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, (byte)iData));
+            customExplodeBlocks.add(block);
+            break;
+        case DIRT:
+            // Copy on condition
+            iter.remove();
+            data = block.getData();
+            if (data != 0) {
+                block.setType(Material.AIR);
+                block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, data));
+                customExplodeBlocks.add(block);
+            }
             break;
         case GLOWING_REDSTONE_ORE:
             iter.remove();
