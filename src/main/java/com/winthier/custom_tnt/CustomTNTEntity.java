@@ -16,9 +16,11 @@ import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -279,6 +281,8 @@ public final class CustomTNTEntity implements CustomEntity {
         switch (block.getType()) {
         case MOB_SPAWNER:
             return;
+        default:
+            break;
         }
         iter.remove();
         MaterialData data = block.getState().getData();
@@ -293,24 +297,26 @@ public final class CustomTNTEntity implements CustomEntity {
     @EventHandler(ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event, EntityContext context) {
         event.setCancelled(true);
-        if (context.getPosition() == EntityContext.Position.DAMAGER) {
-            if (event.getEntity() instanceof LivingEntity) {
-                LivingEntity entity = (LivingEntity)event.getEntity();
-                Player player = ((Watcher)context.getEntityWatcher()).getSource();
-                if (GenericEventsPlugin.getInstance().playerCanDamageEntity(player, entity)) {
-                    switch (type) {
-                    case NUKE:
-                        entity.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 60, 1));
-                        entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 60, 1));
-                        break;
-                    case KINETIC:
-                        entity.setVelocity(new Vector(random.nextDouble() * 1.0 - 0.5,
-                                                      random.nextDouble() * 4.0 + 2.0,
-                                                      random.nextDouble() * 1.0 - 0.5));
-                        break;
-                    default:
-                        break;
-                    }
+        if (context.getPosition() == EntityContext.Position.DAMAGER
+            && event.getFinalDamage() > 1.0
+            && event.getEntity() instanceof LivingEntity) {
+            LivingEntity entity = (LivingEntity)event.getEntity();
+            Player player = ((Watcher)context.getEntityWatcher()).getSource();
+            if (GenericEventsPlugin.getInstance().playerCanDamageEntity(player, entity)) {
+                switch (type) {
+                case NUKE:
+                    entity.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 60, 1));
+                    entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 60, 1));
+                    if (entity instanceof Sheep) ((Sheep)entity).setSheared(true);
+                    if (entity instanceof Creeper) ((Creeper)entity).setPowered(true);
+                    break;
+                case KINETIC:
+                    entity.setVelocity(new Vector(random.nextDouble() * 1.0 - 0.5,
+                                                  random.nextDouble() * 4.0 + 2.0,
+                                                  random.nextDouble() * 1.0 - 0.5));
+                    break;
+                default:
+                    break;
                 }
             }
         }
