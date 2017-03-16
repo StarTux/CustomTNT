@@ -73,8 +73,7 @@ public final class CustomTNTEntity implements CustomEntity {
         List<Block> customExplodeBlocks = new ArrayList<>();
         while (iter.hasNext()) {
             Block block = iter.next();
-            if (!GenericEventsPlugin.getInstance().playerCanBuild(player, block)
-                || !GenericEventsPlugin.getInstance().playerCanGrief(player, block)) {
+            if (!GenericEventsPlugin.getInstance().playerCanGrief(player, block)) {
                 iter.remove();
                 continue;
             }
