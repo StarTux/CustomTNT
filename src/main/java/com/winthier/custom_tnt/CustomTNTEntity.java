@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -279,10 +280,22 @@ public final class CustomTNTEntity implements CustomEntity {
     void filterKinetic(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
         switch (block.getType()) {
         case MOB_SPAWNER:
+        case WALL_SIGN:
+        case SIGN_POST:
+        case STANDING_BANNER:
+        case WALL_BANNER:
+        case SKULL:
             return;
         default:
             break;
         }
+        BlockState blockState = block.getState();
+        if (blockState instanceof org.bukkit.block.Chest) return;
+        if (blockState instanceof org.bukkit.block.ShulkerBox) return;
+        if (blockState instanceof org.bukkit.block.Skull) return;
+        if (blockState instanceof org.bukkit.block.Banner) return;
+        if (blockState instanceof org.bukkit.block.CommandBlock) return;
+        if (blockState instanceof org.bukkit.block.CreatureSpawner) return;
         iter.remove();
         MaterialData data = block.getState().getData();
         block.setType(Material.AIR);
