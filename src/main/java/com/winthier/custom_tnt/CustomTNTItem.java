@@ -27,7 +27,7 @@ public final class CustomTNTItem implements CustomItem {
         ConfigurationSection config = plugin.getConfig().getConfigurationSection("types").getConfigurationSection(type.key);
         item = Dirty.setSkullOwner(item,
                                    config.getString("DisplayName"),
-                                   UUID.fromString(config.getString("Id", UUID.randomUUID().toString())),
+                                   UUID.fromString(config.getString("Id")),
                                    config.getString("Texture"));
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(Msg.format("&r%s", config.getString("DisplayName")));
