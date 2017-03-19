@@ -64,8 +64,8 @@ public final class CustomTNTEntity implements CustomEntity {
     @EventHandler(ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event, EntityContext context) {
         CustomPlugin.getInstance().getEntityManager().removeEntityWatcher(context.getEntityWatcher());
-        Iterator<Block> iter = event.blockList().iterator();
         Player player = ((Watcher)context.getEntityWatcher()).getSource();
+        Iterator<Block> iter = event.blockList().iterator();
         if (player == null) {
             event.setCancelled(true);
             event.blockList().clear();
@@ -309,28 +309,28 @@ public final class CustomTNTEntity implements CustomEntity {
     @EventHandler(ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event, EntityContext context) {
         event.setCancelled(true);
-        if (context.getPosition() == EntityContext.Position.DAMAGER
-            && event.getFinalDamage() > 1.0
-            && event.getEntity() instanceof LivingEntity) {
-            LivingEntity entity = (LivingEntity)event.getEntity();
-            Player player = ((Watcher)context.getEntityWatcher()).getSource();
-            if (GenericEventsPlugin.getInstance().playerCanDamageEntity(player, entity)) {
-                switch (type) {
-                case NUKE:
-                    entity.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 60, 1));
-                    entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 60, 1));
-                    if (entity instanceof Sheep) ((Sheep)entity).setSheared(true);
-                    if (entity instanceof Creeper) ((Creeper)entity).setPowered(true);
-                    break;
-                case KINETIC:
-                    entity.setVelocity(new Vector(random.nextDouble() * 1.0 - 0.5,
-                                                  random.nextDouble() * 4.0 + 2.0,
-                                                  random.nextDouble() * 1.0 - 0.5));
-                    break;
-                default:
-                    break;
-                }
-            }
+        if (context.getPosition() != EntityContext.Position.DAMAGER) return;
+        if (event.getFinalDamage() < 1.1) return;
+        if (!(event.getEntity() instanceof LivingEntity) ) return;
+        LivingEntity entity = (LivingEntity)event.getEntity();
+        Player player = ((Watcher)context.getEntityWatcher()).getSource();
+        if (player == null) return;
+        if (!GenericEventsPlugin.getInstance().playerCanDamageEntity(player, entity)) return;
+        if (!GenericEventsPlugin.getInstance().playerCanGrief(player, entity.getLocation().getBlock())) return;
+        switch (type) {
+        case NUKE:
+            entity.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 60, 1));
+            entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 60, 1));
+            if (entity instanceof Sheep) ((Sheep)entity).setSheared(true);
+            if (entity instanceof Creeper) ((Creeper)entity).setPowered(true);
+            break;
+        case KINETIC:
+            entity.setVelocity(new Vector(random.nextDouble() * 1.0 - 0.5,
+                                          random.nextDouble() * 4.0 + 2.0,
+                                          random.nextDouble() * 1.0 - 0.5));
+            break;
+        default:
+            break;
         }
     }
 
