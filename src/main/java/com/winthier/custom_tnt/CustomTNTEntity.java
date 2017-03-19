@@ -285,6 +285,7 @@ public final class CustomTNTEntity implements CustomEntity {
         case STANDING_BANNER:
         case WALL_BANNER:
         case SKULL:
+        case TNT:
             return;
         default:
             break;
