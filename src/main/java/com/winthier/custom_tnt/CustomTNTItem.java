@@ -5,6 +5,7 @@ import com.winthier.custom.item.CustomItem;
 import com.winthier.custom.item.ItemDescription;
 import com.winthier.custom.util.Dirty;
 import com.winthier.custom.util.Msg;
+import com.winthier.generic_events.ItemNameEvent;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -18,6 +19,7 @@ public final class CustomTNTItem implements CustomItem {
     private final CustomTNTType type;
     private final String customId;
     private final ItemStack itemStack;
+    private final String displayName;
 
     CustomTNTItem(CustomTNTPlugin plugin, CustomTNTType type) {
         this.plugin = plugin;
@@ -30,7 +32,8 @@ public final class CustomTNTItem implements CustomItem {
                                    UUID.fromString(config.getString("Id")),
                                    config.getString("Texture"));
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(Msg.format("&r%s", config.getString("DisplayName")));
+        this.displayName = config.getString("DisplayName");
+        meta.setDisplayName(Msg.format("&r%s", displayName));
         item.setItemMeta(meta);
         ItemDescription description = new ItemDescription();
         description.setCategory("Explosive");
@@ -55,5 +58,11 @@ public final class CustomTNTItem implements CustomItem {
     @EventHandler(ignoreCancelled = true)
     public void onBlockPlace(BlockPlaceEvent event) {
         CustomPlugin.getInstance().getBlockManager().wrapBlock(event.getBlock(), customId);
+    }
+
+    @EventHandler
+    public void onItemName(ItemNameEvent event) {
+        System.out.println(type + " -> " + event.getEventName());
+        event.setItemName(displayName);
     }
 }

@@ -7,8 +7,10 @@ import com.winthier.custom.entity.EntityContext;
 import com.winthier.custom.entity.EntityWatcher;
 import com.winthier.generic_events.GenericEventsPlugin;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,8 @@ public final class CustomTNTEntity implements CustomEntity {
     @Getter private final String customId;
     private final Random random = new Random(System.currentTimeMillis());
     private final float yield;
+    private final static MaterialData AIR = new MaterialData(Material.AIR);
+    private boolean ignoreEntityExplodeEvent;
 
     CustomTNTEntity(CustomTNTPlugin plugin, CustomTNTType type) {
         this.plugin = plugin;
@@ -63,6 +67,7 @@ public final class CustomTNTEntity implements CustomEntity {
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event, EntityContext context) {
+        if (ignoreEntityExplodeEvent) return;
         CustomPlugin.getInstance().getEntityManager().removeEntityWatcher(context.getEntityWatcher());
         Player player = ((Watcher)context.getEntityWatcher()).getSource();
         Iterator<Block> iter = event.blockList().iterator();
@@ -71,7 +76,7 @@ public final class CustomTNTEntity implements CustomEntity {
             event.blockList().clear();
             return;
         }
-        List<Block> customExplodeBlocks = new ArrayList<>();
+        Map<Block, MaterialData> customExplodeBlocks = new HashMap<>();
         while (iter.hasNext()) {
             Block block = iter.next();
             if (!GenericEventsPlugin.getInstance().playerCanGrief(player, block)) {
@@ -83,7 +88,6 @@ public final class CustomTNTEntity implements CustomEntity {
                 if (foundWatcher.getCustomBlock() instanceof CustomTNTBlock) {
                     CustomTNTBlock customTNTBlock = (CustomTNTBlock)foundWatcher.getCustomBlock();
                     customTNTBlock.prime(foundWatcher, player);
-                    customExplodeBlocks.add(block);
                 }
                 iter.remove();
             } else {
@@ -92,7 +96,7 @@ public final class CustomTNTEntity implements CustomEntity {
                     filterMining(iter, block);
                     break;
                 case WOODCUTTING:
-                    filterWoodcutting(iter, block);
+                    filterWoodcutting(iter, block, customExplodeBlocks);
                     break;
                 case NUKE:
                     filterNuke(iter, block, customExplodeBlocks);
@@ -113,8 +117,33 @@ public final class CustomTNTEntity implements CustomEntity {
             }
         }
         if (!customExplodeBlocks.isEmpty()) {
-            EntityExplodeEvent customEvent = new EntityExplodeEvent(event.getEntity(), event.getEntity().getLocation(), customExplodeBlocks, yield);
+            List<Block> newBlockList = new ArrayList<Block>(customExplodeBlocks.keySet());
+            EntityExplodeEvent customEvent = new EntityExplodeEvent(event.getEntity(), event.getEntity().getLocation(), newBlockList, yield);
+            ignoreEntityExplodeEvent = true;
             plugin.getServer().getPluginManager().callEvent(customEvent);
+            ignoreEntityExplodeEvent = false;
+            if (customEvent.isCancelled()) return;
+            for (Block block: newBlockList) {
+                MaterialData data = customExplodeBlocks.get(block);
+                switch (type) {
+                case WOODCUTTING:
+                    block.breakNaturally();
+                    break;
+                case SILK:
+                    block.setType(Material.AIR);
+                    block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(data.getItemType(), 1, data.getData()));
+                    break;
+                case KINETIC:
+                    block.setType(Material.AIR);
+                    Vector velo = new Vector(random.nextDouble() * 0.5 - 0.25,
+                                             random.nextDouble() * 2.0 + 1.0,
+                                             random.nextDouble() * 0.5 - 0.25);
+                    block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data).setVelocity(velo);
+                    break;
+                default:
+                    block.setTypeIdAndData(data.getItemType().getId(), data.getData(), true);
+                }
+            }
         }
     }
 
@@ -131,7 +160,8 @@ public final class CustomTNTEntity implements CustomEntity {
         }
     }
 
-    void filterWoodcutting(Iterator<Block> iter, Block block) {
+    void filterWoodcutting(Iterator<Block> iter, Block block, Map<Block, MaterialData> customExplodeBlocks) {
+        iter.remove();
         switch (block.getType()) {
         case LOG:
         case LOG_2:
@@ -139,13 +169,14 @@ public final class CustomTNTEntity implements CustomEntity {
         case LEAVES_2:
         case HUGE_MUSHROOM_1:
         case HUGE_MUSHROOM_2:
+            customExplodeBlocks.put(block, AIR);
             break;
         default:
-            iter.remove();
+            break;
         }
     }
 
-    void filterNuke(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
+    void filterNuke(Iterator<Block> iter, Block block, Map<Block, MaterialData> customExplodeBlocks) {
         switch (block.getType()) {
         case LEAVES:
         case LEAVES_2:
@@ -183,35 +214,31 @@ public final class CustomTNTEntity implements CustomEntity {
         case SAPLING:
         case MELON_STEM:
         case PUMPKIN_STEM:
-            block.setType(Material.DEAD_BUSH);
             iter.remove();
-            customExplodeBlocks.add(block);
+            customExplodeBlocks.put(block, new MaterialData(Material.DEAD_BUSH));
             break;
         case GRASS:
         case MYCEL:
         case DIRT:
         case GRASS_PATH:
             iter.remove();
-            block.setType(Material.DIRT);
-            block.setData((byte)1); // Coarse dirt
-            customExplodeBlocks.add(block);
+            // Coarse dirt
+            customExplodeBlocks.put(block, new MaterialData(Material.DIRT, (byte)1));
             break;
         case SOIL:
             iter.remove();
-            block.setType(Material.SOUL_SAND);
-            customExplodeBlocks.add(block);
+            customExplodeBlocks.put(block, new MaterialData(Material.SOUL_SAND));
             break;
         case SAND:
             iter.remove();
-            block.setType(Material.GLASS);
-            customExplodeBlocks.add(block);
+            customExplodeBlocks.put(block, new MaterialData(Material.GLASS));
             break;
         default:
             iter.remove();
         }
     }
 
-    void filterSilk(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
+    void filterSilk(Iterator<Block> iter, Block block, Map<Block, MaterialData> customExplodeBlocks) {
         Material mat = block.getType();
         switch (mat) {
         case STONE:
@@ -233,9 +260,7 @@ public final class CustomTNTEntity implements CustomEntity {
         case SNOW:
             // Copy without data
             iter.remove();
-            block.setType(Material.AIR);
-            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat));
-            customExplodeBlocks.add(block);
+            customExplodeBlocks.put(block, new MaterialData(mat));
             break;
         case STAINED_GLASS:
         case STAINED_GLASS_PANE:
@@ -243,41 +268,34 @@ public final class CustomTNTEntity implements CustomEntity {
             // Copy with data
             iter.remove();
             byte data = block.getData();
-            block.setType(Material.AIR);
-            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, data));
-            customExplodeBlocks.add(block);
+            customExplodeBlocks.put(block, new MaterialData(mat, data));
             break;
         case LEAVES:
         case LEAVES_2:
             // Copy with modified leaf data
             iter.remove();
             int iData = (int)block.getData() & ~12;
-            block.setType(Material.AIR);
-            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, (byte)iData));
-            customExplodeBlocks.add(block);
+            customExplodeBlocks.put(block, new MaterialData(mat, (byte)iData));
             break;
         case DIRT:
             // Copy on condition
             iter.remove();
             data = block.getData();
             if (data != 0) {
-                block.setType(Material.AIR);
-                block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(mat, 1, data));
-                customExplodeBlocks.add(block);
+                customExplodeBlocks.put(block, new MaterialData(mat, data));
             }
             break;
         case GLOWING_REDSTONE_ORE:
+            // Copy modified material
             iter.remove();
-            block.setType(Material.AIR);
-            block.getWorld().dropItemNaturally(block.getLocation().add(0.5, 0.5, 0.5), new ItemStack(Material.REDSTONE_ORE));
-            customExplodeBlocks.add(block);
+            customExplodeBlocks.put(block, new MaterialData(Material.REDSTONE_ORE));
             break;
         default:
             iter.remove();
         }
     }
 
-    void filterKinetic(Iterator<Block> iter, Block block, List<Block> customExplodeBlocks) {
+    void filterKinetic(Iterator<Block> iter, Block block, Map<Block, MaterialData> customExplodeBlocks) {
         switch (block.getType()) {
         case MOB_SPAWNER:
         case WALL_SIGN:
@@ -298,13 +316,7 @@ public final class CustomTNTEntity implements CustomEntity {
         if (blockState instanceof org.bukkit.block.CommandBlock) return;
         if (blockState instanceof org.bukkit.block.CreatureSpawner) return;
         iter.remove();
-        MaterialData data = block.getState().getData();
-        block.setType(Material.AIR);
-        Vector velo = new Vector(random.nextDouble() * 0.5 - 0.25,
-                                 random.nextDouble() * 2.0 + 1.0,
-                                 random.nextDouble() * 0.5 - 0.25);
-        block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data).setVelocity(velo);
-        customExplodeBlocks.add(block);
+        customExplodeBlocks.put(block, block.getState().getData());
     }
 
     @EventHandler(ignoreCancelled = true)
