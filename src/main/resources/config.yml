@@ -24,7 +24,7 @@ types:
     Id: 30a55204-8ae8-476e-803f-97324e627391
     Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNlNmQ4MjE4NmEzNzdmNTQzNWU5ODZkMWY5NmIwNDY5MTk3MTM4NjFiYmJiZGVlMzBlYWRiODMxYzI0In19fQ==
     Description: 'Break blocks such as ores, stone, glass, and some others, as if they were broken with a silk touch pickaxe.'
-    Yield: 4
+    Yield: 8
   kinetic:
     DisplayName: Kinetic Blast
     Id: 685c5a22-6aeb-4392-a59a-6d6e0d611221
@@ -36,4 +36,4 @@ types:
     Id: cb9bc04e-23bf-4ac0-a7d4-38ddda0e8d97
     Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjM5NWQzN2Y4ODg1MTEzZmI3ZmNiOGY1YzYxNzQ1MjAxYmVmZjk5MWZiZDUyYWM1ZmZkNzkxYTkwNTZkNiJ9fX0=
     Description: 'This powerful charge has significantly more explosive potential than its vanilla counterpart.'
-    Yield: 16
+    Yield: 20
