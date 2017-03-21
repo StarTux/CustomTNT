@@ -62,7 +62,6 @@ public final class CustomTNTItem implements CustomItem {
 
     @EventHandler
     public void onItemName(ItemNameEvent event) {
-        System.out.println(type + " -> " + event.getEventName());
         event.setItemName(displayName);
     }
 }
