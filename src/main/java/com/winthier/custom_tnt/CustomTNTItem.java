@@ -3,7 +3,7 @@ package com.winthier.custom_tnt;
 import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.item.CustomItem;
 import com.winthier.custom.item.ItemDescription;
-import com.winthier.custom.item.NoCraftingItem;
+import com.winthier.custom.item.UncraftableItem;
 import com.winthier.custom.util.Dirty;
 import com.winthier.custom.util.Msg;
 import com.winthier.generic_events.GenericEventsPlugin;
@@ -19,7 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
-public final class CustomTNTItem implements CustomItem, NoCraftingItem {
+public final class CustomTNTItem implements CustomItem, UncraftableItem {
     private final CustomTNTPlugin plugin;
     private final CustomTNTType type;
     private final String customId;
