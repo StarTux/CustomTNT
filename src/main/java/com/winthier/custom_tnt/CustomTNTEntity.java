@@ -256,8 +256,14 @@ public final class CustomTNTEntity implements CustomEntity {
         case GLASS:
         case THIN_GLASS:
         case ICE:
+        case PACKED_ICE:
         case VINE:
         case SNOW:
+        case SEA_LANTERN:
+        case HUGE_MUSHROOM_1:
+        case HUGE_MUSHROOM_2:
+        case ENDER_CHEST:
+        case BOOKSHELF:
             // Copy without data
             iter.remove();
             customExplodeBlocks.put(block, new MaterialData(mat));
