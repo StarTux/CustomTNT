@@ -10,6 +10,7 @@ import com.winthier.generic_events.ItemNameEvent;
 import java.util.UUID;
 import lombok.Getter;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,10 +58,10 @@ public final class BombBagItem implements CustomItem {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event, ItemContext context) {
-        event.setCancelled(true);
         switch (event.getAction()) {
         case RIGHT_CLICK_BLOCK:
         case RIGHT_CLICK_AIR:
+            event.setCancelled(true);
             openBag(event.getPlayer(), context.getItemStack());
             break;
         default:
@@ -85,6 +86,11 @@ public final class BombBagItem implements CustomItem {
     }
 
     void openBag(Player player, ItemStack item) {
-        CustomPlugin.getInstance().getInventoryManager().openInventory(player, new BombBagInventory(plugin, player, item));
+        if (item.getAmount() == 1) {
+            CustomPlugin.getInstance().getInventoryManager().openInventory(player, new BombBagInventory(plugin, player, item));
+        } else {
+            Msg.sendActionBar(player, "&cUnstack the bomb bag first!");
+            player.playSound(player.getEyeLocation(), Sound.BLOCK_DISPENSER_FAIL, 1.0f, 0.55f);
+        }
     }
 }
