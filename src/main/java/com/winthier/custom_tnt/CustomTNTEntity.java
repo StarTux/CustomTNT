@@ -40,7 +40,7 @@ public final class CustomTNTEntity implements CustomEntity {
     @Getter private final String customId;
     private final Random random = new Random(System.currentTimeMillis());
     private final float yield;
-    private final static MaterialData AIR = new MaterialData(Material.AIR);
+    private static final MaterialData AIR = new MaterialData(Material.AIR);
     private boolean ignoreEntityExplodeEvent;
 
     CustomTNTEntity(CustomTNTPlugin plugin, CustomTNTType type) {
@@ -330,7 +330,7 @@ public final class CustomTNTEntity implements CustomEntity {
         event.setCancelled(true);
         if (context.getPosition() != EntityContext.Position.DAMAGER) return;
         if (event.getFinalDamage() < 1.1) return;
-        if (!(event.getEntity() instanceof LivingEntity) ) return;
+        if (!(event.getEntity() instanceof LivingEntity)) return;
         LivingEntity entity = (LivingEntity)event.getEntity();
         Player player = ((Watcher)context.getEntityWatcher()).getSource();
         if (player == null) return;
