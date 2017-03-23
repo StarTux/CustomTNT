@@ -4,6 +4,7 @@ import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.item.CustomItem;
 import com.winthier.custom.item.ItemContext;
 import com.winthier.custom.item.ItemDescription;
+import com.winthier.custom.item.NoCraftingItem;
 import com.winthier.custom.util.Dirty;
 import com.winthier.custom.util.Msg;
 import com.winthier.generic_events.ItemNameEvent;
@@ -21,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
-public final class BombBagItem implements CustomItem {
+public final class BombBagItem implements CustomItem, NoCraftingItem {
     private final CustomTNTPlugin plugin;
     private final ItemStack itemStack;
     private final String displayName;
