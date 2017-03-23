@@ -15,6 +15,7 @@ import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -61,6 +62,7 @@ public final class BombBagItem implements CustomItem, UncraftableItem {
     public void onPlayerInteract(PlayerInteractEvent event, ItemContext context) {
         switch (event.getAction()) {
         case RIGHT_CLICK_BLOCK:
+            if (event.getPlayer().isSneaking()) return;
         case RIGHT_CLICK_AIR:
             event.setCancelled(true);
             openBag(event.getPlayer(), context.getItemStack());
@@ -76,9 +78,9 @@ public final class BombBagItem implements CustomItem, UncraftableItem {
         openBag(event.getPlayer(), context.getItemStack());
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onBlockPlace(BlockPlaceEvent event) {
-        event.setCancelled(true);
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+    public void onBlockPlace(BlockPlaceEvent event, ItemContext context) {
+        plugin.getBombBagBlock().save(CustomPlugin.getInstance().getBlockManager().wrapBlock(event.getBlock(), customId), context.getItemStack());
     }
 
     @EventHandler
@@ -93,5 +95,18 @@ public final class BombBagItem implements CustomItem, UncraftableItem {
             Msg.sendActionBar(player, "&cUnstack the bomb bag first!");
             player.playSound(player.getEyeLocation(), Sound.BLOCK_DISPENSER_FAIL, 1.0f, 0.55f);
         }
+    }
+
+    void updateBagDescription(ItemStack item) {
+        Dirty.TagWrapper config = Dirty.TagWrapper.getItemConfigOf(item);
+        ItemDescription desc = itemDescription.clone();
+        for (CustomTNTType type: CustomTNTType.values()) {
+            int amount = config.getInt(type.key);
+            if (amount > 0) {
+                String tntName = plugin.getItems().get(type).getDisplayName();
+                desc.getStats().put(tntName, "" + amount);
+            }
+        }
+        desc.apply(item);
     }
 }

@@ -41,7 +41,7 @@ types:
 bomb_bag_item:
     DisplayName: Bomb Bag
     Description: 'This bag can store all kinds of explosives.'
-    Usage: 'Right click to open the bag. Click the collect icon to transfer all explosives from your inventory into the bag. Click one of the items in the bag to retrieve it. Shift click to get up to a whole stack.'
+    Usage: 'Right click to open the bag. Click the collect icon to transfer all explosives from your inventory into the bag. Click one of the items in the bag to retrieve it. Shift click to get up to a whole stack. Sneak to be able to place the bag.'
     Id: 89f732e1-d9ce-c575-2fbb-61c1b7afeff6
     Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzViMTE2ZGM3NjlkNmQ1NzI2ZjEyYTI0ZjNmMTg2ZjgzOTQyNzMyMWU4MmY0MTM4Nzc1YTRjNDAzNjdhNDkifX19
 bomb_bag_inventory:

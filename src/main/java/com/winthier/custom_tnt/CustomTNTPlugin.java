@@ -14,6 +14,7 @@ public final class CustomTNTPlugin extends JavaPlugin implements Listener {
     private final Map<CustomTNTType, CustomTNTBlock> blocks = new EnumMap<>(CustomTNTType.class);
     private final Map<CustomTNTType, CustomTNTEntity> entities = new EnumMap<>(CustomTNTType.class);
     private BombBagItem bombBagItem;
+    private BombBagBlock bombBagBlock;
 
     @Override
     public void onEnable() {
@@ -36,6 +37,8 @@ public final class CustomTNTPlugin extends JavaPlugin implements Listener {
             event.addEntity(entity);
         }
         this.bombBagItem = new BombBagItem(this);
+        this.bombBagBlock = new BombBagBlock(this);
         event.addItem(bombBagItem);
+        event.addBlock(bombBagBlock);
     }
 }

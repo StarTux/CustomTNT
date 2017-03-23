@@ -73,7 +73,7 @@ public final class BombBagInventory implements CustomInventory {
                 player.playSound(player.getEyeLocation(), Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.5f);
                 Msg.sendActionBar(player, "&aStored %d explosives.", total);
                 populateItems();
-                updateBagDescription();
+                plugin.getBombBagItem().updateBagDescription(bombBagItem);
             } else {
                 Msg.sendActionBar(player, "&cNothing found!");
                 player.playSound(player.getEyeLocation(), Sound.BLOCK_DISPENSER_FAIL, 1.0f, 0.55f);
@@ -84,7 +84,7 @@ public final class BombBagInventory implements CustomInventory {
             if (total > 0) {
                 Msg.sendActionBar(player, "&aRetrieved %d explosives.", total);
                 populateItems();
-                updateBagDescription();
+                plugin.getBombBagItem().updateBagDescription(bombBagItem);
             } else {
                 Msg.sendActionBar(player, "&cNothing found!");
                 player.playSound(player.getEyeLocation(), Sound.BLOCK_DISPENSER_FAIL, 1.0f, 0.55f);
@@ -127,18 +127,5 @@ public final class BombBagInventory implements CustomInventory {
         config.setInt(type.key, has - amount);
         CustomPlugin.getInstance().getItemManager().dropItemStack(player.getEyeLocation(), type.customId, amount).setPickupDelay(0);
         return amount;
-    }
-
-    private void updateBagDescription() {
-        Dirty.TagWrapper config = Dirty.TagWrapper.getItemConfigOf(bombBagItem);
-        ItemDescription desc = plugin.getBombBagItem().getItemDescription().clone();
-        for (CustomTNTType type: CustomTNTType.values()) {
-            int amount = config.getInt(type.key);
-            if (amount > 0) {
-                String displayName = plugin.getItems().get(type).getDisplayName();
-                desc.getStats().put(displayName, "" + amount);
-            }
-        }
-        desc.apply(bombBagItem);
     }
 }
