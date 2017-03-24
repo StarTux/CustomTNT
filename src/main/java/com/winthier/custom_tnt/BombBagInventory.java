@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -58,6 +59,11 @@ public final class BombBagInventory implements CustomInventory {
     @Override
     public void onInventoryOpen(InventoryOpenEvent event) {
         populateItems();
+    }
+
+    @Override
+    public void onInventoryClose(InventoryCloseEvent event) {
+        player.playSound(player.getEyeLocation(), Sound.ENTITY_HORSE_ARMOR, 1.0f, 2.0f);
     }
 
     @Override
