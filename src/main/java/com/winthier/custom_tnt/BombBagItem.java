@@ -90,6 +90,7 @@ public final class BombBagItem implements CustomItem, UncraftableItem {
 
     void openBag(Player player, ItemStack item) {
         if (item.getAmount() == 1) {
+            player.playSound(player.getEyeLocation(), Sound.ENTITY_HORSE_ARMOR, 1.0f, 0.65f);
             CustomPlugin.getInstance().getInventoryManager().openInventory(player, new BombBagInventory(plugin, player, item));
         } else {
             Msg.sendActionBar(player, "&cUnstack the bomb bag first!");
