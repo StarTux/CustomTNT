@@ -58,6 +58,7 @@ public final class BombBagInventory implements CustomInventory {
 
     @Override
     public void onInventoryOpen(InventoryOpenEvent event) {
+        player.playSound(player.getEyeLocation(), Sound.ENTITY_HORSE_ARMOR, 1.0f, 0.65f);
         populateItems();
     }
 

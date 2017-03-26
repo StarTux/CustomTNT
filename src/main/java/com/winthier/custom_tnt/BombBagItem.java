@@ -5,6 +5,7 @@ import com.winthier.custom.item.CustomItem;
 import com.winthier.custom.item.ItemContext;
 import com.winthier.custom.item.ItemDescription;
 import com.winthier.custom.item.UncraftableItem;
+import com.winthier.custom.item.UpdatableItem;
 import com.winthier.custom.util.Dirty;
 import com.winthier.custom.util.Msg;
 import com.winthier.generic_events.ItemNameEvent;
@@ -23,7 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
-public final class BombBagItem implements CustomItem, UncraftableItem {
+public final class BombBagItem implements CustomItem, UncraftableItem, UpdatableItem {
     private final CustomTNTPlugin plugin;
     private final ItemStack itemStack;
     private final String displayName;
@@ -90,7 +91,6 @@ public final class BombBagItem implements CustomItem, UncraftableItem {
 
     void openBag(Player player, ItemStack item) {
         if (item.getAmount() == 1) {
-            player.playSound(player.getEyeLocation(), Sound.ENTITY_HORSE_ARMOR, 1.0f, 0.65f);
             CustomPlugin.getInstance().getInventoryManager().openInventory(player, new BombBagInventory(plugin, player, item));
         } else {
             Msg.sendActionBar(player, "&cUnstack the bomb bag first!");
@@ -109,5 +109,10 @@ public final class BombBagItem implements CustomItem, UncraftableItem {
             }
         }
         desc.apply(item);
+    }
+
+    @Override
+    public void updateItem(ItemStack item) {
+        updateBagDescription(item);
     }
 }

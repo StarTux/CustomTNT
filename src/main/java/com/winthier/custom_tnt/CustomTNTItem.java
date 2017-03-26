@@ -4,6 +4,7 @@ import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.item.CustomItem;
 import com.winthier.custom.item.ItemDescription;
 import com.winthier.custom.item.UncraftableItem;
+import com.winthier.custom.item.UpdatableItem;
 import com.winthier.custom.util.Dirty;
 import com.winthier.custom.util.Msg;
 import com.winthier.generic_events.GenericEventsPlugin;
@@ -19,7 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 @Getter
-public final class CustomTNTItem implements CustomItem, UncraftableItem {
+public final class CustomTNTItem implements CustomItem, UncraftableItem, UpdatableItem {
     private final CustomTNTPlugin plugin;
     private final CustomTNTType type;
     private final String customId;
@@ -72,5 +73,10 @@ public final class CustomTNTItem implements CustomItem, UncraftableItem {
     @EventHandler
     public void onItemName(ItemNameEvent event) {
         event.setItemName(displayName);
+    }
+
+    @Override
+    public void updateItem(ItemStack item) {
+        itemDescription.apply(item);
     }
 }
