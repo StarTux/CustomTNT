@@ -21,6 +21,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
@@ -138,7 +139,9 @@ public final class CustomTNTEntity implements CustomEntity {
                     Vector velo = new Vector(random.nextDouble() * 0.5 - 0.25,
                                              random.nextDouble() * 2.0 + 1.0,
                                              random.nextDouble() * 0.5 - 0.25);
-                    block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data).setVelocity(velo);
+                    FallingBlock falling = block.getWorld().spawnFallingBlock(block.getLocation().add(0.5, 0.0, 0.5), data);
+                    falling.setVelocity(velo);
+                    falling.setDropItem(false);
                     break;
                 default:
                     block.setTypeIdAndData(data.getItemType().getId(), data.getData(), true);
