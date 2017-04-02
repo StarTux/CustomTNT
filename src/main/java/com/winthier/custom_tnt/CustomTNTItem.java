@@ -104,6 +104,7 @@ public final class CustomTNTItem implements CustomItem, UncraftableItem, Updatab
                 ItemStack item = context.getItemStack();
                 Player player = context.getPlayer();
                 if (player.isSneaking()) return;
+                if (!GenericEventsPlugin.getInstance().playerCanBuild(event.getPlayer(), player.getLocation().getBlock())) return;
                 event.setCancelled(true);
                 CustomTNTEntity.Watcher watcher = (CustomTNTEntity.Watcher)CustomPlugin.getInstance().getEntityManager().spawnEntity(player.getEyeLocation(), customId);
                 if (watcher == null) return;
