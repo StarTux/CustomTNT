@@ -40,5 +40,6 @@ public final class CustomTNTPlugin extends JavaPlugin implements Listener {
         this.bombBagBlock = new BombBagBlock(this);
         event.addItem(bombBagItem);
         event.addBlock(bombBagBlock);
+        event.addEntity(new Shrapnel(this));
     }
 }

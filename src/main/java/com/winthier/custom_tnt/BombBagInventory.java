@@ -29,7 +29,7 @@ public final class BombBagInventory implements CustomInventory {
         this.plugin = plugin;
         this.player = player;
         this.bombBagItem = bombBagItem;
-        this.inventory = Bukkit.getServer().createInventory(player, 9, "Bomb Bag");
+        this.inventory = Bukkit.getServer().createInventory(player, 18, "Bomb Bag");
         ItemStack storeIcon = new ItemStack(Material.CHEST);
         ItemDescription desc = new ItemDescription();
         desc.setCategory(plugin.getConfig().getString("bomb_bag_inventory.category.Store"));

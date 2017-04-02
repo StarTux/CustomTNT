@@ -1,5 +1,6 @@
 lore:
   Usage: 'Place this block on the ground, then punch it to activate the fuse. You will have a couple of seconds before it explodes. To defuse and pick up a placed TNT block, break it with shears.'
+  BombUsage: 'Throw this bomb in the air. It will explode after a brief moment. Sneak to place a block instead and punch it to activate. Use shears to break and pick up a placed bomb.'
 NoGriefWarning: '&4You cannot place explosives here!'
 types:
   mining:
@@ -38,6 +39,24 @@ types:
     Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjM5NWQzN2Y4ODg1MTEzZmI3ZmNiOGY1YzYxNzQ1MjAxYmVmZjk5MWZiZDUyYWM1ZmZkNzkxYTkwNTZkNiJ9fX0=
     Description: 'This powerful charge has significantly more explosive potential than its vanilla counterpart.'
     Yield: 20
+  incendiary:
+    DisplayName: Incendiary Bomb
+    Id: 7d867304-fa72-49e1-a288-697a4f709e9f
+    Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWY1MzU0Y2EyZWUxYjhmZGM5NTViYjQzN2JiMjYxOTU3NWZjNzk4M2YzNjlhZmEzYTFmN2QxYjk3NTY3ZWE4In19fQ==
+    Description: 'Set your enemies on fire and drain their life in no time.'
+    Yield: 4
+  fragmentation:
+    DisplayName: Frag Grenade
+    Id: 0088a29c-615f-46a0-b817-d2ece809344d
+    Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzYzMThhMTMxNzJhOTllYmZhYjg2NTVlNmM5MjFjNzc0MmQ0ZDdmODcwNTg1ZjQ4OTllYWE0ZjM2NTE5NSJ9fX0=
+    Description: 'Throw countless deadly shrapnels in all directions at your enemies.'
+    Yield: 4
+  pressure:
+    DisplayName: Pressure Bomb
+    Id: 4bf7a3f5-0839-4fe3-a39c-ba6216130a52
+    Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmM1NjNiOWI1ODI0MDlmNDFmMGUwNzgxYTk4M2FmZTNkOGZlMmZiZjM4M2M1M2E1ZDI3NDMxNTU1NjRkNjgifX19
+    Description: 'Defeat your opponents by catapulting them high up in the air. The resulting fall damage is sure to kill them.'
+    Yield: 4
 bomb_bag_item:
     DisplayName: Bomb Bag
     Description: 'This bag can store all kinds of explosives.'

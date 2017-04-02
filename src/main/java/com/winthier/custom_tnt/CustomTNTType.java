@@ -6,7 +6,10 @@ enum CustomTNTType {
     NUKE("nuke"),
     SILK("silk_tnt"),
     KINETIC("kinetic_tnt"),
-    POWER("power_tnt");
+    POWER("power_tnt"),
+    INCENDIARY("incendiary_bomb"),
+    FRAGMENTATION("fragmentation_bomb"),
+    PRESSURE("pressure_bomb");
 
     public final String key;
     public final String customId;

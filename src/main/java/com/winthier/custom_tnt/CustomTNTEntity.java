@@ -19,14 +19,17 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Hanging;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
@@ -71,13 +74,33 @@ public final class CustomTNTEntity implements CustomEntity {
         if (ignoreEntityExplodeEvent) return;
         CustomPlugin.getInstance().getEntityManager().removeEntityWatcher(context.getEntityWatcher());
         Player player = ((Watcher)context.getEntityWatcher()).getSource();
-        Iterator<Block> iter = event.blockList().iterator();
         if (player == null) {
             event.setCancelled(true);
             event.blockList().clear();
             return;
         }
+        Entity tnt = context.getEntity();
+        for (Entity damagee: tnt.getNearbyEntities(yield, yield, yield)) {
+            if (damagee instanceof Hanging) continue;
+            hitEntity(player, damagee);
+        }
+        switch (type) { // Special case bombs
+        case FRAGMENTATION:
+            event.blockList().clear();
+            for (int i = 0; i < 100; i += 1) {
+                EntityWatcher watcher = CustomPlugin.getInstance().getEntityManager().spawnEntity(tnt.getLocation(), "tnt:shrapnel");
+                ((Arrow)watcher.getEntity()).setShooter(player);
+            }
+            return;
+        case PRESSURE:
+        case INCENDIARY:
+            // Do nothing, wait for entity damage
+            event.blockList().clear();
+            return;
+        default: break;
+        }
         Map<Block, MaterialData> customExplodeBlocks = new HashMap<>();
+        Iterator<Block> iter = event.blockList().iterator();
         while (iter.hasNext()) {
             Block block = iter.next();
             if (!GenericEventsPlugin.getInstance().playerCanGrief(player, block)) {
@@ -328,29 +351,39 @@ public final class CustomTNTEntity implements CustomEntity {
         customExplodeBlocks.put(block, block.getState().getData());
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event, EntityContext context) {
         event.setCancelled(true);
-        if (context.getPosition() != EntityContext.Position.DAMAGER) return;
-        if (event.getFinalDamage() < 1.1) return;
-        if (!(event.getEntity() instanceof LivingEntity)) return;
-        LivingEntity entity = (LivingEntity)event.getEntity();
-        Player player = ((Watcher)context.getEntityWatcher()).getSource();
-        if (player == null) return;
+    }
+
+    void hitEntity(Player player, Entity entity) {
         if (!GenericEventsPlugin.getInstance().playerCanDamageEntity(player, entity)) return;
-        if (!GenericEventsPlugin.getInstance().playerCanGrief(player, entity.getLocation().getBlock())) return;
+        LivingEntity living = entity instanceof LivingEntity ? (LivingEntity)entity : null;
+        switch (type) {
+        case INCENDIARY:
+        case FRAGMENTATION:
+        case PRESSURE:
+            break;
+        default:
+            if (!GenericEventsPlugin.getInstance().playerCanGrief(player, entity.getLocation().getBlock())) return;
+        }
         switch (type) {
         case NUKE:
-            entity.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 60, 1));
-            entity.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 60, 1));
-            if (entity instanceof Sheep) ((Sheep)entity).setSheared(true);
-            if (entity instanceof Creeper) ((Creeper)entity).setPowered(true);
+            if (living != null) {
+                living.addPotionEffect(new PotionEffect(PotionEffectType.GLOWING, 20 * 60, 1));
+                living.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 20 * 60, 1));
+                if (living instanceof Sheep) ((Sheep)living).setSheared(true);
+                if (living instanceof Creeper) ((Creeper)living).setPowered(true);
+            }
             break;
         case KINETIC:
+        case PRESSURE:
             entity.setVelocity(new Vector(random.nextDouble() * 1.0 - 0.5,
                                           random.nextDouble() * 4.0 + 2.0,
                                           random.nextDouble() * 1.0 - 0.5));
             break;
+        case INCENDIARY:
+            entity.setFireTicks(Math.max(entity.getFireTicks(), 20 * 60));
         default:
             break;
         }

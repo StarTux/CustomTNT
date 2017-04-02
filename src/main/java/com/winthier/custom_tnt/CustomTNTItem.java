@@ -2,6 +2,7 @@ package com.winthier.custom_tnt;
 
 import com.winthier.custom.CustomPlugin;
 import com.winthier.custom.item.CustomItem;
+import com.winthier.custom.item.ItemContext;
 import com.winthier.custom.item.ItemDescription;
 import com.winthier.custom.item.UncraftableItem;
 import com.winthier.custom.item.UpdatableItem;
@@ -11,11 +12,17 @@ import com.winthier.generic_events.GenericEventsPlugin;
 import com.winthier.generic_events.ItemNameEvent;
 import java.util.UUID;
 import lombok.Getter;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -46,7 +53,16 @@ public final class CustomTNTItem implements CustomItem, UncraftableItem, Updatab
         ItemDescription description = new ItemDescription();
         description.setCategory("Explosive");
         description.setDescription(config.getString("Description"));
-        description.setUsage(plugin.getConfig().getString("lore.Usage"));
+        switch (type) {
+        case INCENDIARY:
+        case FRAGMENTATION:
+        case PRESSURE:
+            description.setUsage(plugin.getConfig().getString("lore.BombUsage"));
+            break;
+        default:
+            description.setUsage(plugin.getConfig().getString("lore.Usage"));
+            break;
+        }
         description.apply(item);
         this.itemStack = item;
         this.itemDescription = description;
@@ -61,13 +77,45 @@ public final class CustomTNTItem implements CustomItem, UncraftableItem, Updatab
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    public void onBlockPlace(BlockPlaceEvent event) {
-        if (!GenericEventsPlugin.getInstance().playerCanGrief(event.getPlayer(), event.getBlock())) {
-            Msg.sendActionBar(event.getPlayer(), noGriefWarning);
-            event.setCancelled(true);
-            return;
+    public void onBlockPlace(BlockPlaceEvent event, ItemContext context) {
+        switch (type) {
+        case INCENDIARY:
+        case FRAGMENTATION:
+        case PRESSURE:
+            break;
+        default:
+            if (!GenericEventsPlugin.getInstance().playerCanGrief(event.getPlayer(), event.getBlock())) {
+                Msg.sendActionBar(event.getPlayer(), noGriefWarning);
+                event.setCancelled(true);
+                return;
+            }
         }
         CustomPlugin.getInstance().getBlockManager().wrapBlock(event.getBlock(), customId);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerInteract(PlayerInteractEvent event, ItemContext context) {
+        if (event.getAction() == Action.RIGHT_CLICK_AIR
+            || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            switch (type) {
+            case INCENDIARY:
+            case FRAGMENTATION:
+            case PRESSURE:
+                ItemStack item = context.getItemStack();
+                Player player = context.getPlayer();
+                if (player.isSneaking()) return;
+                event.setCancelled(true);
+                CustomTNTEntity.Watcher watcher = (CustomTNTEntity.Watcher)CustomPlugin.getInstance().getEntityManager().spawnEntity(player.getEyeLocation(), customId);
+                if (watcher == null) return;
+                watcher.setSource(player);
+                watcher.getEntity().setVelocity(player.getLocation().getDirection());
+                ((TNTPrimed)watcher.getEntity()).setFuseTicks(20);
+                if (player.getGameMode() != GameMode.CREATIVE) item.setAmount(item.getAmount() - 1);
+                player.playSound(watcher.getEntity().getLocation(), Sound.ENTITY_TNT_PRIMED, 1.0f, 1.8f);
+                break;
+            default: break;
+            }
+        }
     }
 
     @EventHandler
