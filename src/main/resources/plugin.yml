@@ -3,6 +3,6 @@ description: Custom TNT
 author: StarTux
 version: 0.1
 main: com.winthier.custom_tnt.CustomTNTPlugin
-depend: [ Custom, Ore ]
+depend: [ Custom ]
 commands: {}
 permissions: {}
