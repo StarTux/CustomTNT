@@ -70,6 +70,11 @@ public final class BombBagInventory implements CustomInventory {
     @Override
     public void onInventoryClick(InventoryClickEvent event) {
         event.setCancelled(true);
+        if (bombBagItem.getAmount() != 1) {
+            Msg.sendActionBar(player, "&cUnstack the bomb bag first!");
+            CustomInventory.closeInventory(player);
+            return;
+        }
         if (!event.isLeftClick()) return;
         if (event.getClickedInventory() == null) return;
         if (!event.getClickedInventory().equals(inventory)) return;
