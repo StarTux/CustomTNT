@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Creeper;
@@ -93,16 +94,23 @@ public final class CustomTNTEntity implements CustomEntity {
         switch (type) { // Special case bombs
         case FRAGMENTATION:
             event.blockList().clear();
-            Location shrapnelSpawnLocation = tnt.getLocation().add(0.0, tnt.getHeight() * 0.5, 0.0);
+            Location centerLocation = tnt.getLocation().add(0.0, tnt.getHeight() * 0.5, 0.0);
             for (int i = 0; i < 100; i += 1) {
-                Shrapnel.Watcher watcher = (Shrapnel.Watcher)CustomPlugin.getInstance().getEntityManager().spawnEntity(shrapnelSpawnLocation, "tnt:shrapnel");
+                Shrapnel.Watcher watcher = (Shrapnel.Watcher)CustomPlugin.getInstance().getEntityManager().spawnEntity(centerLocation, "tnt:shrapnel");
                 watcher.setShooter(player);
             }
             return;
         case PRESSURE:
-        case INCENDIARY:
-            // Do nothing, wait for entity damage
+            centerLocation = tnt.getLocation().add(0.0, tnt.getHeight() * 0.5, 0.0);
             event.blockList().clear();
+            double halfYield = (double)yield * 0.5;
+            centerLocation.getWorld().spawnParticle(Particle.SWEEP_ATTACK, centerLocation, 20, halfYield, halfYield, halfYield, 0.0);
+            return;
+        case INCENDIARY:
+            centerLocation = tnt.getLocation().add(0.0, tnt.getHeight() * 0.5, 0.0);
+            event.blockList().clear();
+            halfYield = (double)yield * 0.5;
+            centerLocation.getWorld().spawnParticle(Particle.LAVA, centerLocation, 50, halfYield, halfYield, halfYield, 0.0);
             return;
         default: break;
         }
