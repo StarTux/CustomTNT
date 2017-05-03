@@ -32,6 +32,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
@@ -70,9 +72,14 @@ public final class CustomTNTEntity implements CustomEntity {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onExplosionPrime(ExplosionPrimeEvent event, EntityContext context) {
+        plugin.setCancelHangingBreak(true);
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent event, EntityContext context) {
         if (ignoreEntityExplodeEvent) return;
-        CustomPlugin.getInstance().getEntityManager().removeEntityWatcher(context.getEntityWatcher());
+        plugin.setCancelHangingBreak(false);
         Player player = ((Watcher)context.getEntityWatcher()).getSource();
         if (player == null) {
             event.setCancelled(true);
@@ -353,6 +360,12 @@ public final class CustomTNTEntity implements CustomEntity {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event, EntityContext context) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    public void onHangingBreakByEntity(HangingBreakByEntityEvent event, EntityContext context) {
+        // This never gets called because of Spigot. Let's hope for a better future.
         event.setCancelled(true);
     }
 

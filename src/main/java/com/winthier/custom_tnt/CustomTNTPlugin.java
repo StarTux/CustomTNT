@@ -4,8 +4,10 @@ import com.winthier.custom.event.CustomRegisterEvent;
 import java.util.EnumMap;
 import java.util.Map;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -15,6 +17,7 @@ public final class CustomTNTPlugin extends JavaPlugin implements Listener {
     private final Map<CustomTNTType, CustomTNTEntity> entities = new EnumMap<>(CustomTNTType.class);
     private BombBagItem bombBagItem;
     private BombBagBlock bombBagBlock;
+    @Setter private boolean cancelHangingBreak;
 
     @Override
     public void onEnable() {
@@ -41,5 +44,12 @@ public final class CustomTNTPlugin extends JavaPlugin implements Listener {
         event.addItem(bombBagItem);
         event.addBlock(bombBagBlock);
         event.addEntity(new Shrapnel(this));
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    public void onHangingBreak(HangingBreakEvent event) {
+        if (event.getCause() != HangingBreakEvent.RemoveCause.EXPLOSION) return;
+        if (!cancelHangingBreak) return;
+        event.setCancelled(true);
     }
 }
