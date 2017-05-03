@@ -19,7 +19,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
@@ -94,9 +93,10 @@ public final class CustomTNTEntity implements CustomEntity {
         switch (type) { // Special case bombs
         case FRAGMENTATION:
             event.blockList().clear();
+            Location shrapnelSpawnLocation = tnt.getLocation().add(0.0, tnt.getHeight() * 0.5, 0.0);
             for (int i = 0; i < 100; i += 1) {
-                EntityWatcher watcher = CustomPlugin.getInstance().getEntityManager().spawnEntity(tnt.getLocation(), "tnt:shrapnel");
-                ((Arrow)watcher.getEntity()).setShooter(player);
+                Shrapnel.Watcher watcher = (Shrapnel.Watcher)CustomPlugin.getInstance().getEntityManager().spawnEntity(shrapnelSpawnLocation, "tnt:shrapnel");
+                watcher.setShooter(player);
             }
             return;
         case PRESSURE:
